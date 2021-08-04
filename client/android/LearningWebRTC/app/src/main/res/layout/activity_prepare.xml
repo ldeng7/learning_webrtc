@@ -15,7 +15,7 @@
                 android:layout_height="wrap_content"
                 android:text="local uid" />
             <EditText
-                android:id="@+id/localUidInput"
+                android:id="@+id/localUidEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1" />
@@ -28,7 +28,7 @@
                 android:layout_height="wrap_content"
                 android:text="remote uid" />
             <EditText
-                android:id="@+id/remoteUidInput"
+                android:id="@+id/remoteUidEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:maxLines="1" />
@@ -41,7 +41,7 @@
                 android:layout_height="wrap_content"
                 android:text="ws server" />
             <EditText
-                android:id="@+id/wsServerInput"
+                android:id="@+id/wsServerEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="ws://192.168.0.107:8089"
@@ -55,7 +55,7 @@
                 android:layout_height="wrap_content"
                 android:text="stun server" />
             <EditText
-                android:id="@+id/stunServerInput"
+                android:id="@+id/stunServerEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="stun:127.0.0.1:3478"
@@ -69,7 +69,7 @@
                 android:layout_height="wrap_content"
                 android:text="turn server" />
             <EditText
-                android:id="@+id/turnServerInput"
+                android:id="@+id/turnServerEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="turn:127.0.0.1:3478"
@@ -83,7 +83,7 @@
                 android:layout_height="wrap_content"
                 android:text="turn user" />
             <EditText
-                android:id="@+id/turnUserInput"
+                android:id="@+id/turnUserEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="user"
@@ -97,13 +97,19 @@
                 android:layout_height="wrap_content"
                 android:text="turn cred" />
             <EditText
-                android:id="@+id/turnCredInput"
+                android:id="@+id/turnCredEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="test"
                 android:maxLines="1" />
         </TableRow>
     </TableLayout>
+
+    <CheckBox
+        android:id="@+id/noVideoCheck"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="no video" />
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

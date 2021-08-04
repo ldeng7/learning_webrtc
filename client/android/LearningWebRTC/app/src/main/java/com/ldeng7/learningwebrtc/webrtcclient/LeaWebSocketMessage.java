@@ -1,4 +1,4 @@
-package com.ldeng7.learningwebrtc;
+package com.ldeng7.learningwebrtc.webrtcclient;
 
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
@@ -6,8 +6,8 @@ import com.google.gson.annotations.SerializedName;
 import java.util.HashMap;
 import java.util.Map;
 
-public class WebRTCWsMessage {
-    public enum EPhase {
+class LeaWebSocketMessage {
+    enum EPhase {
         INIT,
         DIAL,
         OFFER,
@@ -28,26 +28,26 @@ public class WebRTCWsMessage {
         public String data;
     }
 
-    public static class Response<T> {
+    static class Response<T> {
         public EPhase phase;
         public boolean success;
         public String message;
         public T data;
     }
 
-    public static class DialRequestData {
+    static class DialRequestData {
         @SerializedName("uid")
         public String localUid;
         @SerializedName("ruid")
         public String remoteUid;
     }
 
-    public static class SdpData {
+    static class SdpData {
         public String type;
         public String sdp;
     }
 
-    public static class CandidateData {
+    static class CandidateData {
         public String candidate;
         public String sdpMid;
         public int sdpMLineIndex;
@@ -62,16 +62,16 @@ public class WebRTCWsMessage {
         phaseToDataClass.put(EPhase.CAND, CandidateData.class);
     }
 
-    public static String encode(EPhase phase, Object data) {
+    static String encode(final EPhase phase, final Object data) {
         Request req = new Request();
         req.phase = phase.ordinal();
         req.data = g.toJson(data);
         return g.toJson(req, Request.class);
     }
 
-    public static Response decode(String s) {
-        ResponseInternal ri = g.fromJson(s, ResponseInternal.class);
-        EPhase phase = EPhase.values()[ri.phase];
+    static Response decode(String s) {
+        final ResponseInternal ri = g.fromJson(s, ResponseInternal.class);
+        final EPhase phase = EPhase.values()[ri.phase];
         Response r = new Response();
         r.phase = phase;
         r.success = ri.success;
