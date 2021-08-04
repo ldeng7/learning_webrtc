@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import com.ldeng7.learningwebrtc.databinding.ActivityPrepareBinding;
+import com.ldeng7.learningwebrtc.webrtcclient.LeaWebRTCClient;
 
 public class PrepareActivity extends Activity {
     private ActivityPrepareBinding binding;
@@ -19,17 +20,18 @@ public class PrepareActivity extends Activity {
     }
 
     private void onStartButtonClick() {
-        String[] opts = {
-            this.binding.localUidInput.getText().toString(),
-            this.binding.remoteUidInput.getText().toString(),
-            this.binding.wsServerInput.getText().toString(),
-            this.binding.stunServerInput.getText().toString(),
-            this.binding.turnServerInput.getText().toString(),
-            this.binding.turnUserInput.getText().toString(),
-            this.binding.turnCredInput.getText().toString(),
-        };
+        LeaWebRTCClient.Conf conf = new LeaWebRTCClient.Conf();
+        conf.localUid = this.binding.localUidEditText.getText().toString();
+        conf.remoteUid = this.binding.remoteUidEditText.getText().toString();
+        conf.wsServer = this.binding.wsServerEditText.getText().toString();
+        conf.stunServer = this.binding.stunServerEditText.getText().toString();
+        conf.turnServer = this.binding.turnServerEditText.getText().toString();
+        conf.turnUser = this.binding.turnUserEditText.getText().toString();
+        conf.turnCredential = this.binding.turnCredEditText.getText().toString();
+        conf.noVideo = this.binding.noVideoCheck.isChecked();
+
         Intent intent = new Intent();
-        intent.putExtra(ChatActivity.INTENT_KEY_CONF, opts);
+        intent.putExtra(ChatActivity.INTENT_KEY_CONF, conf);
         intent.setClass(this, ChatActivity.class);
         this.startActivityForResult(intent, -1);
     }
