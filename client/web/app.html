@@ -34,32 +34,35 @@
           <tr>
             <td>local/remote uid</td>
             <td><table><tr>
-              <td><input type="text" class="form-control input-conf" id="input-lu"></td>
-              <td><input type="text" class="form-control input-conf" id="input-ru"></td>
+              <td><input type="text" class="form-control" id="input-local-uid" /></td>
+              <td><input type="text" class="form-control" id="input-remote-uid" /></td>
             </tr></table></td>
           </tr>
           <tr>
             <td>websocket server</td>
-            <td><input type="text" class="form-control input-conf" id="input-ws" value="wss://127.0.0.1:8088"></td>
+            <td><input type="text" class="form-control" id="input-ws-server" value="wss://127.0.0.1:8088" /></td>
           </tr>
           <tr>
             <td>stun server</td>
-            <td><input type="text" class="form-control input-conf" id="input-ss" value="stun:127.0.0.1:3478"></td>
+            <td><input type="text" class="form-control" id="input-stun-server" value="stun:127.0.0.1:3478" /></td>
           </tr>
           <tr>
             <td>turn server</td>
-            <td><input type="text" class="form-control input-conf" id="input-ts" value="turn:127.0.0.1:3478"></td>
+            <td><input type="text" class="form-control" id="input-turn-server" value="turn:127.0.0.1:3478" /></td>
           </tr>
           <tr>
             <td>turn user/cred</td>
             <td><table><tr>
-              <td><input type="text" class="form-control input-conf" id="input-tu" value="user"></td>
-              <td><input type="text" class="form-control input-conf" id="input-tc" value="test"></td>
+              <td><input type="text" class="form-control" id="input-turn-user" value="user" /></td>
+              <td><input type="text" class="form-control" id="input-turn-cred" value="test" /></td>
             </tr></table></td>
+          </tr>
+          <tr>
+            <td colspan="2"><input type="checkbox" id="check-no-video" /> no video</td>
           </tr>
         </table>
       </div>
-      
+
       <div class="col-md-6">
         <h4>Operations</h4>
         <hr/>
@@ -67,6 +70,15 @@
           <li><button class="btn btn-primary" id="button-start">start</button></li>
           <li><button class="btn btn-danger" id="button-stop" disabled>stop</button></li>
         </ul>
+        <div class="input-group">
+          <input type="text" class="form-control" placeholder="Data channel message" id="input-dc" />
+          <span class="input-group-btn">
+            <button class="btn btn-default" id="button-dc-send" disabled>send</button>
+          </span>
+        </div>
+        <div>
+          Received:&nbsp;<span id="text-dc"></span>
+        </div>
       </div>
     </div>
 
@@ -76,7 +88,7 @@
         <li><a href="https://github.com/ldeng7/learning_webrtc">GitHub</a></li>
         <li>祝你身体健康</li>
       </ul>
-      <br />  
+      <br />
     </div>
   </div>
 </body>

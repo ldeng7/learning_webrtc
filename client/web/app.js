@@ -24,13 +24,16 @@ class WebRTCClient {
     this.stream = null
     this.wsConn = null
     this.peerConn = null
+    this.dataChan = null
 
-    this.onAddLocalStream = null
-    this.onAddRemoteStream = null
+    this.onConnected = null
+    this.onDataChanMsg = null
     this.onStop = null
   }
 
   wsSend(phase, data) {
+    console.log("send phase " + phase)
+    console.log(data)
     let req = {
       phase: phase,
       data: JSON.stringify(data),
@@ -71,20 +74,31 @@ class WebRTCClient {
     return true
   }
 
-  start() {
-    let conf = {
-      audio: true,
-      video: { width: { max: 480 } },
+  start(conf, localVideo, remoteVideo) {
+    let ret = this.setConf(conf)
+    if (true !== ret) {
+      return ret
     }
-    navigator.mediaDevices.getUserMedia(conf)
+
+    this.localVideo = localVideo
+    this.remoteVideo = remoteVideo
+    let constraints = {}
+    constraints.audio = true
+    if (!conf.noVideo) {
+      constraints.video = { width: { max: 480 } }
+    }
+    navigator.mediaDevices.getUserMedia(constraints)
       .then((stream) => {
         this.onLoadLocalMedia(stream)
       }).catch(logErr("failed to load local media:"))
+    return true
   }
 
   onLoadLocalMedia(stream) {
     this.stream = stream
-    this.onAddLocalStream(stream)
+    if (!this.conf.noVideo) {
+      this.localVideo.srcObject = stream
+    }
 
     let wsConn = new WebSocket(this.conf.wsServer)
     this.wsConn = wsConn
@@ -94,6 +108,8 @@ class WebRTCClient {
     wsConn.onmessage = (msg) => {
       let resp = JSON.parse(msg.data)
       resp.data = JSON.parse(resp.data)
+      console.log("recv phase " + resp.phase)
+      console.log(resp.data)
       WebRTCClient.wsHandlers[resp.phase].call(this, resp)
     }
     wsConn.onclose = () => {
@@ -103,21 +119,29 @@ class WebRTCClient {
 
   onWsRecvDial(resp) {
     if (true !== resp.success) {
-      this.stop()
       alert(resp.msg)
+      this.stop()
       return
     }
 
     let peerConn = new RTCPeerConnection({ iceServers: this.conf.iceServers })
     this.peerConn = peerConn
-    peerConn.addStream(this.stream)
     peerConn.onicecandidate = (ev) => {
       if (ev.candidate) {
         this.wsSend(WebRTCClient.WS_PHASE_CAND, ev.candidate)
       }
     }
     peerConn.onaddstream = (ev) => {
-      this.onAddRemoteStream(ev.stream)
+      if (!this.conf.noVideo) {
+        this.remoteVideo.srcObject = ev.stream
+      }
+      this.onConnected()
+    }
+
+    peerConn.addStream(this.stream)
+    this.dataChan = peerConn.createDataChannel("dc", { negotiated: true, id: 1 })
+    this.dataChan.onmessage = (ev) => {
+      this.onDataChanMsg(ev.data)
     }
 
     if (true !== resp.data) {
@@ -145,6 +169,10 @@ class WebRTCClient {
     this.stop()
   }
 
+  dataChanSend(msg) {
+    this.dataChan.send(msg)
+  }
+
   stop() {
     if (this.wsConn) {
       this.wsConn.close()
@@ -160,50 +188,49 @@ class WebRTCClient {
 
 window.onload = () => {
   document.getElementById("button-start").onclick = onButtonStartClick
+  document.getElementById("button-dc-send").onclick = onButtonDcSendClick
   document.getElementById("button-stop").onclick = onButtonStopClick
+
   let webRTCClient = new WebRTCClient
   window.webRTCClient = webRTCClient
-  webRTCClient.onAddLocalStream = (stream) => {
-    document.getElementById("video-local").srcObject = stream
-  }
-  webRTCClient.onAddRemoteStream = (stream) => {
-    document.getElementById("video-remote").srcObject = stream
+  webRTCClient.onConnected = () => {
     document.getElementById("button-stop").disabled = false
+    document.getElementById("button-dc-send").disabled = false
   }
-  webRTCClient.onStop = onStop
+  webRTCClient.onDataChanMsg = (msg) => {
+    document.getElementById("text-dc").textContent = msg
+  }
+  webRTCClient.onStop = () => {
+    document.getElementById("button-start").disabled = false
+    document.getElementById("button-dc-send").disabled = true
+    document.getElementById("button-stop").disabled = true
+  }
 }
 
 let onButtonStartClick = () => {
-  let conf = {
-    localUid: document.getElementById("input-lu").value,
-    remoteUid: document.getElementById("input-ru").value,
-    wsServer: document.getElementById("input-ws").value,
-    stunServer: document.getElementById("input-ss").value,
-    turnServer: document.getElementById("input-ts").value,
-    turnUser: document.getElementById("input-tu").value,
-    turnCredential: document.getElementById("input-tc").value,
-  }
-  let ret = window.webRTCClient.setConf(conf)
-  if (true !== ret) {
-    alert(ret)
-    return
-  }
-
-  for (let e of document.getElementsByClassName("input-conf")) {
-    e.disabled = true
-  }
   document.getElementById("button-start").disabled = true
-  window.webRTCClient.start()
+  let conf = {
+    localUid: document.getElementById("input-local-uid").value,
+    remoteUid: document.getElementById("input-remote-uid").value,
+    wsServer: document.getElementById("input-ws-server").value,
+    stunServer: document.getElementById("input-stun-server").value,
+    turnServer: document.getElementById("input-turn-server").value,
+    turnUser: document.getElementById("input-turn-user").value,
+    turnCredential: document.getElementById("input-turn-cred").value,
+    noVideo: document.getElementById("check-no-video").checked,
+  }
+  let ret = window.webRTCClient.start(conf,
+    document.getElementById("video-local"), document.getElementById("video-remote"))
+  if (true !== ret) {
+    document.getElementById("button-start").disabled = false
+    alert(ret)
+  }
+}
+
+let onButtonDcSendClick = () => {
+  window.webRTCClient.dataChanSend(document.getElementById("input-dc").value)
 }
 
 let onButtonStopClick = () => {
   window.webRTCClient.stop()
-}
-
-let onStop = () => {
-  for (let e of document.getElementsByClassName("input-conf")) {
-    e.disabled = false
-  }
-  document.getElementById("button-stop").disabled = true
-  document.getElementById("button-start").disabled = false
 }

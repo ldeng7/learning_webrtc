@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"os"
+	"sync"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -43,12 +44,15 @@ func NewHandler() *Handler {
 	return &Handler{
 		userConns: map[*User]*websocket.Conn{},
 		upgrader: &websocket.Upgrader{
-			CheckOrigin: func(_ *http.Request) bool { return true },
+			CheckOrigin:     func(_ *http.Request) bool { return true },
+			ReadBufferSize:  16 * 1024,
+			WriteBufferSize: 16 * 1024,
 		},
 	}
 }
 
 func send(conn *websocket.Conn, resp *Resp) {
+	println("send phase", resp.Phase)
 	if err := conn.WriteJSON(resp); err != nil {
 		println(err.Error())
 	}
@@ -105,6 +109,7 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			continue
 		}
 
+		println("recv phase", req.Phase)
 		switch req.Phase {
 		case PHASE_DIAL:
 			data := DialReqData{}
@@ -148,18 +153,22 @@ func (h *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	h := NewHandler()
-	if len(os.Args) > 4 {
-		go func() {
-			err := http.ListenAndServe(os.Args[4], h)
-			if nil != err {
-				println(err.Error())
-				return
-			}
-		}()
-	}
-	err := http.ListenAndServeTLS(os.Args[1], os.Args[2], os.Args[3], h)
-	if nil != err {
-		println(err.Error())
-		return
-	}
+	go func() {
+		err := http.ListenAndServe(os.Args[1], h)
+		if nil != err {
+			println(err.Error())
+			return
+		}
+	}()
+	go func() {
+		err := http.ListenAndServeTLS(os.Args[2], os.Args[3], os.Args[4], h)
+		if nil != err {
+			println(err.Error())
+			return
+		}
+	}()
+
+	wg := &sync.WaitGroup{}
+	wg.Add(1)
+	wg.Wait()
 }
