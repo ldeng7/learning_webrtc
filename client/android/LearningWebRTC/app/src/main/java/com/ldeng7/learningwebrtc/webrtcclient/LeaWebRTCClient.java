@@ -163,23 +163,24 @@ public abstract class LeaWebRTCClient {
 
     private void loadLocalMedia() {
         this.localStream = this.pcFactory.createLocalMediaStream("ls");
+
         if (!this.conf.noVideo) {
             this.videoSource = this.pcFactory.createVideoSource(this.videoCapturer.isScreencast());
             final VideoTrack vt = this.pcFactory.createVideoTrack("v0", this.videoSource);
             this.localStream.addTrack(vt);
-            vt.addSink(this.localVideo);
-        }
-        this.audioSource = this.pcFactory.createAudioSource(new MediaConstraints());
-        final AudioTrack at = this.pcFactory.createAudioTrack("a0", this.audioSource);
-        this.localStream.addTrack(at);
 
-        if (!this.conf.noVideo) {
             this.surfaceTextureHelper = SurfaceTextureHelper.create("video",
                 this.eglBase.getEglBaseContext());
             this.videoCapturer.initialize(this.surfaceTextureHelper, this.appContext,
                 this.videoSource.getCapturerObserver());
-            this.videoCapturer.startCapture(480, 360, 30);
+            this.videoCapturer.startCapture(480, 360, 25);
+
+            vt.addSink(this.localVideo);
         }
+
+        this.audioSource = this.pcFactory.createAudioSource(new MediaConstraints());
+        final AudioTrack at = this.pcFactory.createAudioTrack("a0", this.audioSource);
+        this.localStream.addTrack(at);
     }
 
     void createPeerConnection() {

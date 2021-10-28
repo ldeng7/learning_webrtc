@@ -1,5 +1,6 @@
 package com.ldeng7.learningwebrtc.webrtcclient;
 
+import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -67,9 +68,9 @@ class LeaWebSocketClient extends WebSocketClient {
 
     @Override
     public void onOpen(ServerHandshake shd) {
-//        if (null == Looper.myLooper()) {
-//            Looper.prepare();
-//        }
+        if (null == Looper.myLooper()) {
+            Looper.prepare();
+        }
         LeaWebSocketMessage.DialRequestData data = new LeaWebSocketMessage.DialRequestData();
         data.localUid = this.webRTCClient.conf.localUid;
         data.remoteUid = this.webRTCClient.conf.remoteUid;
